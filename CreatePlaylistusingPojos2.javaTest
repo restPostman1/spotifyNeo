@@ -1,0 +1,97 @@
+package usingpojos;
+//import static io.restassured.matcher.RestAssuredMatchers.*;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.testng.annotations.Test;
+
+import io.restassured.response.Response;
+import pojos.Error;
+import pojos.Example;
+import reusable.AppSpecificPlaylist;
+import utils.DataLoader;
+import utils.StatusCodes;
+
+
+
+public class CreatePlaylistusingPojos2Test {
+	
+	
+
+	@Test ()
+	public void userAbleToCreatePlaylist() {
+		
+		  Example example = new Example()
+				 .setName("Builder playlist1")
+		         .setDescription("via pojo")
+		         .setPublic(false);
+		 
+		  Response response= AppSpecificPlaylist.post(example);
+		  Example responselisted = response.as(Example.class);
+		  
+		  org.hamcrest.MatcherAssert.assertThat(responselisted.getName(), equalTo(example.getName()));
+		  org.hamcrest.MatcherAssert.assertThat(response.statusCode(), equalTo(StatusCodes.CODE_201.getCode()));
+		 // context.setAttribute("PlaylistID",responselisted.getId() );
+		
+	}
+	
+	 
+	@Test()
+	public void userAbleTofetchPlaylist() {
+		
+		  
+		  Response response= AppSpecificPlaylist.get(DataLoader.getInstance().getPlaylistID());
+		  Example responselisted = response.as(Example.class);
+		  
+		  org.hamcrest.MatcherAssert.assertThat(responselisted.getId(), equalTo(DataLoader.getInstance().getPlaylistID()));
+		  org.hamcrest.MatcherAssert.assertThat(response.statusCode(), equalTo(StatusCodes.CODE_200.getCode()));
+	}
+	 
+	@Test ()
+	public void userAbleToupdatePlaylist() {
+		
+		  Example example = new Example()
+				 .setName("Builder playlist1 to playlist2")
+		         .setDescription("via pojo")
+		         .setPublic(false);
+		  
+		  Response response= AppSpecificPlaylist.put(example, DataLoader.getInstance().getPlaylistID());
+		  org.hamcrest.MatcherAssert.assertThat(response.statusCode(), equalTo(StatusCodes.CODE_200.getCode()));
+		 
+	}  
+		 
+		 
+		
+	@Test ()
+	public void userNotAbleToCreatePlaylistBlankName() {
+		
+		  Example example = new Example()
+				 .setName("")
+		         .setDescription("via pojo")
+		         .setPublic(false);
+		
+		 
+		  Response response= AppSpecificPlaylist.post(example);
+		  Error responselisted = response.as( Error.class);
+		  
+		  org.hamcrest.MatcherAssert.assertThat(responselisted.getError().getStatus(), equalTo(StatusCodes.CODE_400.getCode()));
+		  org.hamcrest.MatcherAssert.assertThat(responselisted.getError().getMessage(), equalTo(StatusCodes.CODE_400.getMsg()));
+		
+	}
+	
+	
+	@Test ()
+	public void usernotAbleToCreatePlaylistExpiredToken() {
+		
+		  Example example = new Example()
+				 .setName("Builder playlist123")
+		         .setDescription("via pojo")
+		         .setPublic(false);
+		
+		 
+		  Response response= AppSpecificPlaylist.post(example, "BQAexYTSnzKpOV-WmU2cSh9FDnsDD4pkhrpylqsK8CS0bT9rdltWsg6NDFsYiZ3N2dbK-P0jAEDxuurfSn6sTdZjKfkCdojry9Z3FIqLtddFLdpLILFh0NTK7TMeOyJQKJ8eIihoXxq_O-6W3ScsSHJzuMju5Wf9CrsmethyzxBEDm-gvQwutcogY6TZYiBJe7NvyMaLY7ORu94aqEw82C5N4msPnG4bnVyQUi656bn977p7fSsvzd7PV4M-cjS6-6CtANoEbFEQS8eNtw");
+    	  Error responselisted = response.as( Error.class);
+		  org.hamcrest.MatcherAssert.assertThat(responselisted.getError().getStatus(), equalTo(StatusCodes.CODE_401.getCode()));
+		  org.hamcrest.MatcherAssert.assertThat(responselisted.getError().getMessage(), equalTo(StatusCodes.CODE_401.getMsg()));
+		
+	}
+}
